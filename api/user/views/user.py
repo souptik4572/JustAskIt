@@ -3,15 +3,15 @@ from django.db import IntegrityError
 from django.utils.decorators import decorator_from_middleware
 from rest_framework.decorators import api_view
 from rest_framework import status
-from .serializers import EndUserSerializer, LocationSerializer, EducationSerializer, EmploymentSerializer
-from .models import EndUser, Location, Education, Employment, Follow
+from ..serializers import EndUserSerializer, LocationSerializer, EducationSerializer, EmploymentSerializer
+from ..models import EndUser, Location, Education, Employment, Follow
 from django.views.decorators.csrf import csrf_exempt
 import json
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
 from decouple import config
-from ..middleware.auth_strategy import AuthStrategyMiddleware
+from ...middleware.auth_strategy import AuthStrategyMiddleware
 
 ACCESS_SECRET_TOKEN = config('ACCESS_SECRET_TOKEN')
 BCRYPT_SALT = int(config('BCRYPT_SALT'))

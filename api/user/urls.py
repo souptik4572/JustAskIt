@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register_end_user, login_user, get_user_profile, edit_user_profile
+from .views.user import register_end_user, login_user, get_user_profile, edit_user_profile
 
 urlpatterns = [
     path('register/', register_end_user, name='api.register_end_user'),
