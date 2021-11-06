@@ -18,10 +18,10 @@ class LocationSerializer(serializers.HyperlinkedModelSerializer):
 class EducationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Education
-        fields = ('school', 'degree_type', 'graduation_year')
+        fields = ('id', 'school', 'degree_type', 'graduation_year')
 
 
 class EmploymentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Employment
-        fields = ('position', 'company', 'start_year', 'end_year')
+        fields = ('id', 'position', 'company', 'start_year', 'end_year')

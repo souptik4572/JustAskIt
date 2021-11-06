@@ -2,8 +2,8 @@ from django.http import JsonResponse
 from django.utils.decorators import decorator_from_middleware
 from rest_framework.decorators import api_view
 from rest_framework import status
-from ..models import EndUser, Location
-from ..serializers import LocationSerializer
+from ..models import EndUser, Education
+from ..serializers import EducationSerializer
 from django.views.decorators.csrf import csrf_exempt
 import json
 from ...middleware.auth_strategy import AuthStrategyMiddleware
@@ -12,16 +12,16 @@ from ...middleware.auth_strategy import AuthStrategyMiddleware
 @csrf_exempt
 @api_view(['DELETE'])
 @decorator_from_middleware(AuthStrategyMiddleware)
-def delete_existing_location(request, location_id):
+def delete_existing_education(request, education_id):
     try:
-        existing_location = Location.objects.get(
-            id=location_id, user__id=request.user.id)
-        existing_location.delete()
+        existing_education = Education.objects.get(
+            id=education_id, user__id=request.user.id)
+        existing_education.delete()
         return JsonResponse({
             'success': True,
-            'message': 'Successfully deleted location for user'
+            'message': 'Successfully deleted education for user'
         }, status=status.HTTP_200_OK)
-    except Location.DoesNotExist:
+    except Education.DoesNotExist:
         return JsonResponse({
             'success': False,
             'message': 'Location with given id does not exist'
@@ -36,23 +36,23 @@ def delete_existing_location(request, location_id):
 @csrf_exempt
 @api_view(['PATCH'])
 @decorator_from_middleware(AuthStrategyMiddleware)
-def edit_existing_location(request, location_id):
+def edit_existing_education(request, education_id):
     data = json.loads(request.body)
     try:
-        existing_location = Location.objects.get(
-            id=location_id, user__id=request.user.id)
-        if 'location' in data:
-            existing_location.location = data['location']
-        if 'start_year' in data:
-            existing_location.start_year = data['start_year']
-        if 'end_year' in data:
-            existing_location.end_year = data['end_year']
+        existing_education = Education.objects.get(
+            id=education_id, user__id=request.user.id)
+        if 'school' in data:
+            existing_education.school = data['school']
+        if 'degree_type' in data:
+            existing_education.degree_type = data['degree_type']
+        if 'graduation_year' in data:
+            existing_education.graduation_year = data['graduation_year']
         return JsonResponse({
             'success': True,
-            'message': 'Successfully updated existing location data',
-            'location': LocationSerializer(existing_location).data
+            'message': 'Successfully updated existing education data',
+            'education': EducationSerializer(existing_education).data
         }, status=status.HTTP_202_ACCEPTED)
-    except Location.DoesNotExist:
+    except Education.DoesNotExist:
         return JsonResponse({
             'success': False,
             'message': 'Location with given id does not exist'
@@ -67,28 +67,28 @@ def edit_existing_location(request, location_id):
 @csrf_exempt
 @api_view(['PUT'])
 @decorator_from_middleware(AuthStrategyMiddleware)
-def add_new_location(request):
+def add_new_education(request):
     data = json.loads(request.body)
     try:
-        location = data['location']
-        start_year = data['start_year']
-        end_year = None
-        if 'end_year' in data:
-            end_year = data['end_year']
-        location_count = Location.objects.filter(
+        school = data['school']
+        degree_type = data['degree_type']
+        graduation_year = None
+        if 'graduation_year' in data:
+            graduation_year = data['graduation_year']
+        education_count = Education.objects.filter(
             user__id=request.user.id).count()
-        if location_count >= 3:
+        if education_count >= 4:
             return JsonResponse({
                 'success': False,
-                'message': 'Only recent 3 location data are allowed. Please delete other locations and then add new one'
+                'message': 'Only recent 3 education data are allowed. Please delete other educations and then add new one'
             }, status=status.HTTP_403_FORBIDDEN)
         endUser = EndUser.objects.get(pk=request.user.id)
-        new_location = Location.objects.create(
-            user=endUser, location=location, start_year=start_year, end_year=end_year)
+        new_education = Education.objects.create(
+            user=endUser, school=school, degree_type=degree_type, graduation_year=graduation_year)
         return JsonResponse({
             'success': True,
-            'message': 'Successfully added new location',
-            'location': LocationSerializer(new_location).data
+            'message': 'Successfully added new education data',
+            'education': EducationSerializer(new_education).data
         }, status=status.HTTP_201_CREATED)
     except KeyError:
         return JsonResponse({
