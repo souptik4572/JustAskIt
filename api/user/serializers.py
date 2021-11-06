@@ -5,8 +5,8 @@ from .models import EndUser, Location, Education, Employment
 class EndUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = EndUser
-        fields = ('id', 'name', 'email', 'phone', 'description',
-                  'followers', 'following', 'profile_image', 'created_at')
+        fields = ('id', 'name', 'email', 'phone',
+                  'description',  'profile_image', 'created_at')
 
 
 class LocationSerializer(serializers.HyperlinkedModelSerializer):

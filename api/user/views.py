@@ -4,7 +4,7 @@ from django.utils.decorators import decorator_from_middleware
 from rest_framework.decorators import api_view
 from rest_framework import status
 from .serializers import EndUserSerializer, LocationSerializer, EducationSerializer, EmploymentSerializer
-from .models import EndUser, Location, Education, Employment
+from .models import EndUser, Location, Education, Employment, Follow
 from django.views.decorators.csrf import csrf_exempt
 import json
 import bcrypt
@@ -29,12 +29,48 @@ def check_password(given_password, actual_password):
 
 
 @csrf_exempt
+@api_view(['PATCH'])
+@decorator_from_middleware(AuthStrategyMiddleware)
+def edit_user_profile(request):
+    data = json.loads(request.body)
+    try:
+        endUser = EndUser.objects.get(pk=request.user.id)
+        if 'name' in data:
+            endUser.name = data['name']
+        if 'email' in data:
+            endUser.email = data['email']
+        if 'phone' in data:
+            endUser.phone = data['phone']
+        if 'description' in data:
+            endUser.description = data['description']
+        if 'profile_image' in data:
+            endUser.profile_image = data['profile_image']
+        endUser.save()
+        return JsonResponse({
+            'success': True,
+            'message': 'Successfully updated data'
+        })
+    except EndUser.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'User with given email does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+@csrf_exempt
 @api_view(['GET'])
 @decorator_from_middleware(AuthStrategyMiddleware)
 def get_user_profile(request):
     try:
         endUser = EndUser.objects.get(pk=request.user.id)
         endUserData = EndUserSerializer(endUser).data
+        endUserData['followers'] = Follow.objects.filter(followee__id=endUser.id).count()
+        endUserData['following'] = Follow.objects.filter(follower__id=endUser.id).count()
         endUserData['location'] = LocationSerializer(
             Location.objects.filter(user__id=endUser.id).all(), many=True).data
         endUserData['education'] = EducationSerializer(
@@ -113,8 +149,7 @@ def register_end_user(request):
                                          description=description, profile_image=profile_image)
         return JsonResponse({
             'success': True,
-            'message': 'Successfully created end user',
-            'end_user': EndUserSerializer(endUser).data
+            'message': 'Successfully registered end user',
         }, status=status.HTTP_201_CREATED)
     except KeyError:
         return JsonResponse({
