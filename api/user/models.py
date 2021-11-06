@@ -25,11 +25,18 @@ class Location(models.Model):
     start_year = models.DateField()
     end_year = models.DateField(blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.id} - {self.location}"
+
 class Education(models.Model):
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE)
     school = models.CharField(max_length=256)
     degree_type = models.CharField(max_length=60)
     graduation_year = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.id} - {self.school}"
+
 
 class Employment(models.Model):
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE)
@@ -37,3 +44,6 @@ class Employment(models.Model):
     company = models.CharField(max_length=256)
     start_year = models.DateField()
     end_year = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.id} - {self.position} - {self.company}"
