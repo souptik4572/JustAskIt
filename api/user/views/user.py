@@ -143,7 +143,7 @@ def edit_user_profile(request):
         return JsonResponse({
             'success': True,
             'message': 'Successfully updated data'
-        })
+        }, status=status.HTTP_202_ACCEPTED)
     except EndUser.DoesNotExist:
         return JsonResponse({
             'success': False,
