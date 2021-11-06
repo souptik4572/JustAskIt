@@ -4,7 +4,7 @@ from django.utils.decorators import decorator_from_middleware
 from rest_framework.decorators import api_view
 from rest_framework import status
 from ..serializers import EndUserSerializer, LocationSerializer, EducationSerializer, EmploymentSerializer
-from ..models import EndUser, Location, Education, Employment, Follow
+from ..models import EndUser, Location, Education, Employment, Follow, Token
 from django.views.decorators.csrf import csrf_exempt
 import json
 import bcrypt
@@ -12,20 +12,114 @@ import jwt
 from datetime import datetime, timedelta
 from decouple import config
 from ...middleware.auth_strategy import AuthStrategyMiddleware
+import os
+import binascii
+from datetime import datetime, timedelta
+import pytz
+
+utc = pytz.UTC
 
 ACCESS_SECRET_TOKEN = config('ACCESS_SECRET_TOKEN')
 BCRYPT_SALT = int(config('BCRYPT_SALT'))
 
 
-def hash_password(password):
+def hash_item(item, is_password=True):
+    item = item.encode('utf-8') if is_password else item
     return str(bcrypt.hashpw(
-        password.encode('utf-8'), bcrypt.gensalt(BCRYPT_SALT))).replace("b'", "").replace("'", "")
+        item, bcrypt.gensalt(BCRYPT_SALT))).replace("b'", "").replace("'", "")
 
 
 def check_password(given_password, actual_password):
     return bcrypt.checkpw(given_password.encode('utf-8'), actual_password.encode('utf-8'))
 
 # Create your views here.
+
+
+@csrf_exempt
+@api_view(['PATCH'])
+def update_password(request):
+    data = json.loads(request.body)
+    try:
+        token = data['token']
+        user_id = data['user_id']
+        password = data['password']
+        endUser = EndUser.objects.get(pk=user_id)
+        password_reset_token = Token.objects.get(user__id=user_id)
+        if utc.localize(datetime.now()) - password_reset_token.created_at > timedelta(days=1):
+            password_reset_token.delete()
+            return JsonResponse({
+                'success': False,
+                'message': 'Expired password reset token'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if not bcrypt.checkpw(token.encode('utf-8'), password_reset_token.token.encode('utf-8')):
+            password_reset_token.delete()
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid password reset token'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        hashed_password = hash_item(password)
+        endUser.password = hashed_password
+        endUser.save()
+        password_reset_token.delete()
+        return JsonResponse({
+            'success': True,
+            'message': 'Successfully saved new password'
+        }, status=status.HTTP_200_OK)
+    except KeyError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Please provide all data'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    except EndUser.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'User with given id does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Token.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid or expired password reset token'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+@csrf_exempt
+@api_view(['POST'])
+def request_password_reset(request):
+    data = json.loads(request.body)
+    try:
+        email = data['email']
+        endUser = EndUser.objects.get(email=email)
+        token = Token.objects.filter(user__id=endUser.id).first()
+        if token:
+            token.delete()
+        reset_token = binascii.b2a_hex(os.urandom(20))
+        hash = hash_item(reset_token, False)
+        token = Token.objects.create(user=endUser, token=hash)
+        return JsonResponse({
+            'success': True,
+            'token': str(reset_token).replace("b'", "").replace("'", ""),
+            'id': endUser.id
+        }, status=status.HTTP_200_OK)
+    except KeyError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Email data is missing'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    except EndUser.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'User with given email does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
 
 
 @csrf_exempt
@@ -69,8 +163,10 @@ def get_user_profile(request):
     try:
         endUser = EndUser.objects.get(pk=request.user.id)
         endUserData = EndUserSerializer(endUser).data
-        endUserData['followers'] = Follow.objects.filter(followee__id=endUser.id).count()
-        endUserData['following'] = Follow.objects.filter(follower__id=endUser.id).count()
+        endUserData['followers'] = Follow.objects.filter(
+            followee__id=endUser.id).count()
+        endUserData['following'] = Follow.objects.filter(
+            follower__id=endUser.id).count()
         endUserData['location'] = LocationSerializer(
             Location.objects.filter(user__id=endUser.id).all(), many=True).data
         endUserData['education'] = EducationSerializer(
@@ -144,7 +240,7 @@ def register_end_user(request):
         password = data['password']
         description = data['description']
         profile_image = data['profile_image']
-        hashed_password = hash_password(password)
+        hashed_password = hash_item(password)
         endUser = EndUser.objects.create(name=name, email=email, phone=phone, password=hashed_password,
                                          description=description, profile_image=profile_image)
         return JsonResponse({

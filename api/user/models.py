@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your models here.
 
@@ -60,3 +62,10 @@ class Follow(models.Model):
 
     def __str__(self):
         return f"{self.follower.name} follows {self.followee.name}"
+
+class Token(models.Model):
+    user = models.ForeignKey(
+        EndUser, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
