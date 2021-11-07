@@ -1,5 +1,5 @@
 from django.urls import path
-from .views.user import register_end_user, login_user, get_user_profile, edit_user_profile, request_password_reset, update_password
+from .views.user import register_end_user, login_user, get_user_profile, edit_user_profile, request_password_reset, update_password, get_general_user_profile
 from .views.location import add_new_location, edit_existing_location, delete_existing_location
 from .views.education import add_new_education, edit_existing_education, delete_existing_education
 from .views.employment import add_new_employment, edit_existing_employment, delete_existing_employment
@@ -14,6 +14,8 @@ urlpatterns = [
          name='api.request_password_reset'),
     path('update-password/', update_password,
          name='api.update_password'),
+    path('<int:user_id>/profile/', get_general_user_profile,
+         name='api.get_general_user_profile'),
 
     # All Location routes for a particular user
     path('location/new/', add_new_location, name='api.add_new_location'),

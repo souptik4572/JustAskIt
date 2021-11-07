@@ -34,6 +34,37 @@ def check_password(given_password, actual_password):
 
 # Create your views here.
 
+@csrf_exempt
+@api_view(['GET'])
+def get_general_user_profile(request, user_id):
+    try:
+        endUser = EndUser.objects.get(pk=user_id)
+        endUserData = EndUserSerializer(endUser).data
+        endUserData['followers'] = Follow.objects.filter(
+            followee__id=endUser.id).count()
+        endUserData['following'] = Follow.objects.filter(
+            follower__id=endUser.id).count()
+        endUserData['location'] = LocationSerializer(
+            Location.objects.filter(user__id=endUser.id).all(), many=True).data
+        endUserData['education'] = EducationSerializer(
+            Education.objects.filter(user__id=endUser.id).all(), many=True).data
+        endUserData['employment'] = EmploymentSerializer(
+            Employment.objects.filter(user__id=endUser.id).all(), many=True).data
+        return JsonResponse({
+            'success': True,
+            'message': 'User profile data',
+            'end_user': endUserData
+        })
+    except EndUser.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'User with given email does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
 
 @csrf_exempt
 @api_view(['PATCH'])
