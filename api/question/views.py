@@ -37,11 +37,14 @@ def get_all_questions_of_logged_user(request):
 def get_all_questions(request):
     try:
         if request.user is None:
+            # If no user is logged, we fetch all public questions
             questions = Question.objects.filter(ask_type=PUBLIC).all()
         else:
+            # If user is logged, we fetch only those limited questions which are posted by some followee user to our logged user
             public_questions = Question.objects.filter(ask_type=PUBLIC).all()
             followees = Follow.objects.filter(follower__id=request.user.id).values('id')
             limited_questions = Question.objects.filter(owner__id__in=followees)
+            #  combining both of the questions
             questions = public_questions | limited_questions
         return JsonResponse({
             'success': True,
