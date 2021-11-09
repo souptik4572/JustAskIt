@@ -14,9 +14,29 @@ from ..middleware.auth_strategy import AuthStrategyMiddleware
 
 @csrf_exempt
 @api_view(['GET'])
+@decorator_from_middleware(AuthStrategyMiddleware)
+def get_all_questions_of_logged_user(request):
+    try:
+        questions = Question.objects.filter(owner__id=request.user.id).all()
+        return JsonResponse({
+            'success': True,
+            'message': 'All questions of logged in user',
+            'questions': QuestionSerializer(questions, many=True).data
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@decorator_from_middleware_with_args(AuthStrategyMiddleware)(False)
 def get_all_questions(request):
     try:
-        questions = Question.objects.filter(ask_type=PUBLIC).all()
+        if request.user is None:
+            questions = Question.objects.filter(ask_type=PUBLIC).all()
         return JsonResponse({
             'success': True,
             'message': 'All questions from the portal',
@@ -38,6 +58,11 @@ def create_new_question(request):
         question = data['question']
         ask_type = PUBLIC
         if 'ask_type' in data:
+            if data['ask_type'] not in (LIMITED, PUBLIC):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Invalid value of ask_type property'
+                }, status=status.HTTP_400_BAD_REQUEST)
             ask_type = data['ask_type']
         endUser = request.user
         new_question = Question.objects.create(
@@ -69,6 +94,13 @@ def edit_existing_question(request, question_id):
             id=question_id, owner__id=request.user.id)
         if 'question' in data:
             existing_question.question = data['question']
+        if 'ask_type' in data:
+            if data['ask_type'] not in (LIMITED, PUBLIC):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Invalid value of ask_type property'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            existing_question.ask_type = data['ask_type']
         existing_question.save()
         return JsonResponse({
             'success': True,

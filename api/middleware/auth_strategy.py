@@ -9,8 +9,9 @@ ACCESS_SECRET_TOKEN = config('ACCESS_SECRET_TOKEN')
 
 
 class AuthStrategyMiddleware:
-    def __init__(self, get_response):
+    def __init__(self, get_response, is_jwt_required=True):
         self.get_response = get_response
+        self.is_jwt_required = is_jwt_required
 
     def __call__(self, request):
         response = self.get_response(request)
@@ -27,6 +28,9 @@ class AuthStrategyMiddleware:
             # If None is returned the request flow proceeds to the view
             return None
         except AttributeError:
+            if not self.is_jwt_required:
+                request.user = None
+                return None
             return JsonResponse({
                 'success': False,
                 'message': 'Auth Token not provided'
