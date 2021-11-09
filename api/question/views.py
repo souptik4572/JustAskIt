@@ -36,9 +36,12 @@ def create_new_question(request):
     data = json.loads(request.body)
     try:
         question = data['question']
+        ask_type = PUBLIC
+        if 'ask_type' in data:
+            ask_type = data['ask_type']
         endUser = request.user
         new_question = Question.objects.create(
-            question=question, owner=endUser)
+            question=question, ask_type=ask_type, owner=endUser)
         return JsonResponse({
             'success': True,
             'message': 'Successfully created question',
