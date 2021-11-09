@@ -26,6 +26,11 @@ class AuthStrategyMiddleware:
             request.user = EndUser.objects.get(pk=verified_user['id'])
             # If None is returned the request flow proceeds to the view
             return None
+        except AttributeError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Auth Token not provided'
+            }, status=status.HTTP_400_BAD_REQUEST)
         except jwt.InvalidTokenError:
             return JsonResponse({
                 'success': False,
@@ -36,11 +41,11 @@ class AuthStrategyMiddleware:
                 'success': False,
                 'message': 'Token is expired'
             }, status=status.HTTP_404_NOT_FOUND)
-        except AttributeError:
+        except EndUser.DoesNotExist:
             return JsonResponse({
                 'success': False,
-                'message': 'Auth Token not provided'
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': 'User not found'
+            }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return JsonResponse({
                 'success': False,

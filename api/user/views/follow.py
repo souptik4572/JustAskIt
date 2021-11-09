@@ -56,7 +56,7 @@ def unfollow_particular_user(request, user_id):
 @decorator_from_middleware(AuthStrategyMiddleware)
 def follow_particular_user(request, user_id):
     try:
-        follower = EndUser.objects.get(pk=request.user.id)
+        follower = request.user
         followee = EndUser.objects.get(pk=user_id)
         follow = Follow.objects.create(follower=follower, followee=followee)
         return JsonResponse({
@@ -66,7 +66,7 @@ def follow_particular_user(request, user_id):
     except EndUser.DoesNotExist:
         return JsonResponse({
             'success': False,
-            'message': 'Either follower or followee does not exist'
+            'message': 'Followee does not exist'
         }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return JsonResponse({

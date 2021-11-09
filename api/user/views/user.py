@@ -34,6 +34,7 @@ def check_password(given_password, actual_password):
 
 # Create your views here.
 
+
 @csrf_exempt
 @api_view(['GET'])
 def get_general_user_profile(request, user_id):
@@ -58,13 +59,14 @@ def get_general_user_profile(request, user_id):
     except EndUser.DoesNotExist:
         return JsonResponse({
             'success': False,
-            'message': 'User with given email does not exist'
+            'message': 'User with given id does not exist'
         }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return JsonResponse({
             'success': False,
             'message': str(e)
         }, status=status.HTTP_404_NOT_FOUND)
+
 
 @csrf_exempt
 @api_view(['PATCH'])
@@ -159,7 +161,7 @@ def request_password_reset(request):
 def edit_user_profile(request):
     data = json.loads(request.body)
     try:
-        endUser = EndUser.objects.get(pk=request.user.id)
+        endUser = request.user
         if 'name' in data:
             endUser.name = data['name']
         if 'email' in data:
@@ -175,11 +177,6 @@ def edit_user_profile(request):
             'success': True,
             'message': 'Successfully updated data'
         }, status=status.HTTP_202_ACCEPTED)
-    except EndUser.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'User with given email does not exist'
-        }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -192,7 +189,7 @@ def edit_user_profile(request):
 @decorator_from_middleware(AuthStrategyMiddleware)
 def get_user_profile(request):
     try:
-        endUser = EndUser.objects.get(pk=request.user.id)
+        endUser = request.user
         endUserData = EndUserSerializer(endUser).data
         endUserData['followers'] = Follow.objects.filter(
             followee__id=endUser.id).count()
@@ -209,11 +206,6 @@ def get_user_profile(request):
             'message': 'User profile data',
             'end_user': endUserData
         })
-    except EndUser.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'User with given email does not exist'
-        }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return JsonResponse({
             'success': False,

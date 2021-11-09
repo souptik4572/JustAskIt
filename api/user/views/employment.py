@@ -85,7 +85,7 @@ def add_new_employment(request):
                 'success': False,
                 'message': 'Only recent 3 employment data are allowed. Please delete other employments and then add new one'
             }, status=status.HTTP_403_FORBIDDEN)
-        endUser = EndUser.objects.get(pk=request.user.id)
+        endUser = request.user
         new_employment = Employment.objects.create(
             user=endUser, position=position, company=company, start_year=start_year, end_year=end_year)
         return JsonResponse({
@@ -98,11 +98,6 @@ def add_new_employment(request):
             'success': False,
             'message': 'Please provide all data'
         }, status=status.HTTP_400_BAD_REQUEST)
-    except EndUser.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'User does not exist'
-        }, status=status.HTTP_401_UNAUTHORIZED)
     except Exception as e:
         return JsonResponse({
             'success': False,
