@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import EndUser, Location, Education, Employment
+from .models import EndUser, Follow, Location, Education, Employment
 
 
 class EndUserSerializer(serializers.HyperlinkedModelSerializer):
@@ -25,3 +25,12 @@ class EmploymentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Employment
         fields = ('id', 'position', 'company', 'start_year', 'end_year')
+
+
+class FollowSerializer(serializers.HyperlinkedModelSerializer):
+    follower = EndUserSerializer(read_only=True)
+    followee = EndUserSerializer(read_only=True)
+
+    class Meta:
+        model = Follow
+        fields = ('follower', 'followee')
