@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from .serializers import QuestionSerializer
 from .models import Question
+from ..user.models import EndUser, Follow
 from django.views.decorators.csrf import csrf_exempt
 import json
 from ..constants.ask_type_constants import LIMITED, PUBLIC
@@ -22,7 +23,7 @@ def get_all_questions_of_logged_user(request):
             'success': True,
             'message': 'All questions of logged in user',
             'questions': QuestionSerializer(questions, many=True).data
-        })
+        }, status=status.HTTP_200_OK)
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -37,6 +38,11 @@ def get_all_questions(request):
     try:
         if request.user is None:
             questions = Question.objects.filter(ask_type=PUBLIC).all()
+        else:
+            public_questions = Question.objects.filter(ask_type=PUBLIC).all()
+            followees = Follow.objects.filter(follower__id=request.user.id).values('id')
+            limited_questions = Question.objects.filter(owner__id__in=followees)
+            questions = public_questions | limited_questions
         return JsonResponse({
             'success': True,
             'message': 'All questions from the portal',
