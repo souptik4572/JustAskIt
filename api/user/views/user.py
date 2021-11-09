@@ -16,6 +16,7 @@ import os
 import binascii
 from datetime import datetime, timedelta
 import pytz
+from ...utils.mailer import send_password_reset_email
 
 utc = pytz.UTC
 
@@ -133,10 +134,14 @@ def request_password_reset(request):
         reset_token = binascii.b2a_hex(os.urandom(20))
         hash = hash_item(reset_token, False)
         token = Token.objects.create(user=endUser, token=hash)
+        reset_data = {
+            'token': str(reset_token).replace("b'", "").replace("'", ""),
+            'id': endUser.id,
+            'receiver': email,
+        }
+        send_password_reset_email(reset_data)
         return JsonResponse({
             'success': True,
-            'token': str(reset_token).replace("b'", "").replace("'", ""),
-            'id': endUser.id
         }, status=status.HTTP_200_OK)
     except KeyError:
         return JsonResponse({
