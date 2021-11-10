@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.db import IntegrityError
-from django.utils.decorators import decorator_from_middleware
+from django.utils.decorators import decorator_from_middleware, decorator_from_middleware_with_args
 from rest_framework.decorators import api_view
 from rest_framework import status
 from ..serializers import EndUserSerializer, LocationSerializer, EducationSerializer, EmploymentSerializer
@@ -38,6 +38,7 @@ def check_password(given_password, actual_password):
 
 @csrf_exempt
 @api_view(['GET'])
+@decorator_from_middleware_with_args(AuthStrategyMiddleware)(False)
 def get_general_user_profile(request, user_id):
     try:
         endUser = EndUser.objects.get(pk=user_id)
@@ -52,6 +53,11 @@ def get_general_user_profile(request, user_id):
             Education.objects.filter(user__id=endUser.id).all(), many=True).data
         endUserData['employment'] = EmploymentSerializer(
             Employment.objects.filter(user__id=endUser.id).all(), many=True).data
+        if request.user is None:
+            endUserData['is_followed'] = False
+        else:
+            endUserData['is_followed'] = Follow.objects.filter(
+                follower__id=request.user.id, followee=user_id).exists()
         return JsonResponse({
             'success': True,
             'message': 'User profile data',
