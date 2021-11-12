@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'api',
     'api.user',
     'api.question',
+    'api.answer'
 ]
 
 MIDDLEWARE = [
