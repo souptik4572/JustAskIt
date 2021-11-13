@@ -7,10 +7,43 @@ from .models import Answer
 from ..question.models import Question
 from django.views.decorators.csrf import csrf_exempt
 import json
-from ..constants.vote_type_constants import UP_VOTE, DOWN_VOTE
 from ..middleware.auth_strategy import AuthStrategyMiddleware
 
 # Create your views here.
+
+
+@csrf_exempt
+@api_view(['GET'])
+def get_all_answers(request):
+    try:
+        answers = Answer.objects.all()
+        return JsonResponse({
+            'success': True,
+            'message': 'All answers of the portal',
+            'answers': AnswerSerializer(answers, many=True)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+@csrf_exempt
+@api_view(['GET'])
+def get_answer_to_particular_question(request, question_id):
+    try:
+        answers = Answer.objects.filter(question__id=question_id).all()
+        return JsonResponse({
+            'success': True,
+            'message': f"All answers of particular question with id {question_id}",
+            'questions': AnswerSerializer(answers, many=True).data
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
 
 
 @csrf_exempt
