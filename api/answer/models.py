@@ -14,6 +14,9 @@ class Answer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.id} for question {self.question.id}"
+
 
 class AnswerVote(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
@@ -23,3 +26,6 @@ class AnswerVote(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.id} for answer {self.answer.id}"
