@@ -4,13 +4,13 @@ from django.utils.decorators import decorator_from_middleware, decorator_from_mi
 from rest_framework.decorators import api_view
 from rest_framework import status
 from api.constants.ask_type_constants import LIMITED, PUBLIC
-from .serializers import AnswerSerializer
-from .models import Answer
-from ..question.models import Question
-from ..user.models import Follow
+from ..serializers import AnswerSerializer
+from ..models import Answer
+from ...question.models import Question
+from ...user.models import Follow
 from django.views.decorators.csrf import csrf_exempt
 import json
-from ..middleware.auth_strategy import AuthStrategyMiddleware
+from ...middleware.auth_strategy import AuthStrategyMiddleware
 
 # Create your views here.
 
@@ -56,19 +56,19 @@ def get_answers_to_particular_question(request, question_id):
                 return JsonResponse({
                     'success': False,
                     'message': 'Access blocked to unauthorized user'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_401_UNAUTHORIZED)
             answers = Answer.objects.filter(question__id=question_id).all()
         else:
             if not Follow.objects.filter(followee=the_question.owner.id, follower=request.user.id).exists() and the_question.ask_type == LIMITED and the_question.owner.id != request.user.id:
                 return JsonResponse({
                     'success': False,
                     'message': 'Question is limited and can only be accessed by followers of the owner'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_401_UNAUTHORIZED)
             answers = Answer.objects.filter(question__id=question_id).all()
         return JsonResponse({
             'success': True,
             'message': f"All answers of particular question with id {question_id}",
-            'questions': AnswerSerializer(answers, many=True).data
+            'answers': AnswerSerializer(answers, many=True).data
         }, status=status.HTTP_200_OK)
     except Question.DoesNotExist:
         return JsonResponse({
