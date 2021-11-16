@@ -3,7 +3,7 @@ from .views.user import register_end_user, login_user, get_user_profile, edit_us
 from .views.location import add_new_location, edit_existing_location, delete_existing_location
 from .views.education import add_new_education, edit_existing_education, delete_existing_education
 from .views.employment import add_new_employment, edit_existing_employment, delete_existing_employment
-from .views.follow import follow_particular_user, unfollow_particular_user, get_all_followers
+from .views.follow import follow_particular_user, get_all_followees, unfollow_particular_user, get_all_followers
 
 urlpatterns = [
     # All User routes. All routes concern User data and User Model
@@ -45,5 +45,7 @@ urlpatterns = [
     path('<int:user_id>/unfollow/', unfollow_particular_user,
          name='api.unfollow_particular_user'),
     path('followers/', get_all_followers,
-         name='api.get_all_followers')
+         name='api.get_all_followers'),
+    path('followees/', get_all_followees,
+         name='api.get_all_followees'),
 ]

@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from api.constants.ask_type_constants import LIMITED, PUBLIC
 from ..serializers import AnswerSerializer
-from ..models import Answer
+from ..models import Answer, AnswerVote
 from ...question.models import Question
 from ...user.models import Follow
 from django.views.decorators.csrf import csrf_exempt
@@ -19,6 +19,10 @@ from ...middleware.auth_strategy import AuthStrategyMiddleware
 @api_view(['GET'])
 @decorator_from_middleware_with_args(AuthStrategyMiddleware)(False)
 def get_all_answers(request):
+    # In order to get the votes as well, required query is
+    # SELECT *, (SELECT COUNT(*) FROM 'answer_answervote'
+    #            WHERE answer_id = answer_answer.id) as up_votes
+    # FROM 'answer_answer';
     try:
         if request.user is None:
             # If no user is logged, we fetch all answers whose questions are public
@@ -30,9 +34,10 @@ def get_all_answers(request):
             followees = Follow.objects.filter(
                 follower__id=request.user.id).values('id')
             answers_to_limited_questions = Answer.objects.filter(
-                Q(question__owner__id__in=followees) | Q(question__owner__id=request.user.id))
+                Q(question__owner__id__in=followees) | Q(question__owner__id=request.user.id)).all()
             #  combining both of the answers
-            answers = answers_to_public_questions | answers_to_limited_questions
+            answers = (answers_to_public_questions |
+                       answers_to_limited_questions)
         return JsonResponse({
             'success': True,
             'message': 'All answers of the portal',
