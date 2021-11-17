@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from api.constants.ask_type_constants import LIMITED, PUBLIC
 from ..serializers import AnswerSerializer
-from ..models import Answer, AnswerVote
+from ..models import Answer
 from ...question.models import Question
 from ...user.models import Follow
 from django.views.decorators.csrf import csrf_exempt
@@ -112,6 +112,11 @@ def create_new_answer(request, question_id):
             'success': False,
             'message': 'Answer body parameter not found'
         }, status=status.HTTP_400_BAD_REQUEST)
+    except Question.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Question with given id does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return JsonResponse({
             'success': False,
