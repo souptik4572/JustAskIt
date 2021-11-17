@@ -17,6 +17,45 @@ from ..middleware.auth_strategy import AuthStrategyMiddleware
 @csrf_exempt
 @api_view(['GET'])
 @decorator_from_middleware_with_args(AuthStrategyMiddleware)(False)
+def get_all_comments_to_particular_comment(request, comment_id):
+    try:
+        the_comment = Comment.objects.get(id=comment_id)
+        if request.user is None:
+            if the_comment.answer.question.ask_type == LIMITED:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Access blocked to unauthorized user'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            comments = Comment.objects.filter(comment__id=comment_id).all()
+        else:
+            if not (Follow.objects.filter(followee=the_comment.answer.question.owner.id, follower=request.user.id).exists() and
+                    the_comment.answer.question.ask_type == LIMITED and
+                    the_comment.answer.question.owner.id != request.user.id):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Question is limited and can only be accessed by followers of the owner'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            comments = Comment.objects.filter(comment__id=comment_id)
+        return JsonResponse({
+            'success': True,
+            'message': f"All comments of a particular answer with id {comment_id}",
+            'comments': CommentSerializer(comments, many=True).data
+        }, status=status.HTTP_200_OK)
+    except Comment.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Comment does not exist'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@decorator_from_middleware_with_args(AuthStrategyMiddleware)(False)
 def get_all_comments_to_particular_answer(request, answer_id):
     try:
         the_answer = Answer.objects.get(id=answer_id)
@@ -28,7 +67,9 @@ def get_all_comments_to_particular_answer(request, answer_id):
                 }, status=status.HTTP_401_UNAUTHORIZED)
             comments = Comment.objects.filter(answer__id=answer_id).all()
         else:
-            if not Follow.objects.filter(followee=the_answer.question.owner.id, follower=request.user.id).exists() and the_answer.question.ask_type == LIMITED and the_answer.question.owner.id != request.user.id:
+            if not (Follow.objects.filter(followee=the_answer.question.owner.id, follower=request.user.id).exists() and
+                    the_answer.question.ask_type == LIMITED and
+                    the_answer.question.owner.id != request.user.id):
                 return JsonResponse({
                     'success': False,
                     'message': 'Question is limited and can only be accessed by followers of the owner'
@@ -37,7 +78,7 @@ def get_all_comments_to_particular_answer(request, answer_id):
         return JsonResponse({
             'success': True,
             'message': f"All comments of a particular answer with id {answer_id}",
-            'answers': CommentSerializer(comments, many=True).data
+            'comments': CommentSerializer(comments, many=True).data
         }, status=status.HTTP_200_OK)
     except Answer.DoesNotExist:
         return JsonResponse({
@@ -89,7 +130,7 @@ def edit_existing_comment(request, comment_id):
         return JsonResponse({
             'success': True,
             'message': 'Successfully updated comment',
-            'comment': CommentSerializer(existing_comment)
+            'comment': CommentSerializer(existing_comment).data
         }, status=status.HTTP_200_OK)
     except Comment.DoesNotExist:
         return JsonResponse({
@@ -110,7 +151,7 @@ def create_new_comment(request, entity_id):
     data = json.loads(request.body)
     try:
         comment_text = data['comment_text']
-        new_comment = Answer.objects.create(
+        new_comment = Comment.objects.create(
             owner=request.user, comment_text=comment_text)
         if 'to-answer' in request.path:
             answer = Answer.objects.get(id=entity_id)
