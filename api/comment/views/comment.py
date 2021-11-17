@@ -4,12 +4,12 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from api.constants.ask_type_constants import LIMITED
 from api.user.models import Follow
-from .serializers import CommentSerializer
-from .models import Comment
-from ..answer.models import Answer
+from ..serializers import CommentSerializer
+from ..models import Comment
+from ...answer.models import Answer
 from django.views.decorators.csrf import csrf_exempt
 import json
-from ..middleware.auth_strategy import AuthStrategyMiddleware
+from ...middleware.auth_strategy import AuthStrategyMiddleware
 
 # Create your views here.
 

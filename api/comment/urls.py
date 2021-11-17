@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import create_new_comment, edit_existing_comment, delete_existing_comment, get_all_comments_to_particular_answer, get_all_comments_to_particular_comment
+from .views.comment import create_new_comment, edit_existing_comment, delete_existing_comment, get_all_comments_to_particular_answer, get_all_comments_to_particular_comment
+from .views.comment_vote import vote_a_comment
 
 urlpatterns = [
     path('to-answer/<int:answer_id>/', get_all_comments_to_particular_answer,
@@ -14,4 +15,7 @@ urlpatterns = [
          name='api.edit_existing_comment'),
     path('<int:comment_id>/delete/', delete_existing_comment,
          name='api.delete_existing_comment'),
+
+    # Comment voting routes
+    path('<int:comment_id>/vote/', vote_a_comment, name='api.vote_a_comment')
 ]
