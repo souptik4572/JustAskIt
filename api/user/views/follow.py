@@ -10,12 +10,10 @@ from ...middleware.auth_strategy import AuthStrategyMiddleware
 
 @csrf_exempt
 @api_view(['GET'])
-@decorator_from_middleware(AuthStrategyMiddleware)
-def get_all_followers(request):
+def get_all_followers_general(request, user_id):
     try:
         followers = Follow.objects.filter(
-            followee=request.user.id).select_related('follower').all().values('follower')
-        print(followers[0])
+            followee__id=user_id).select_related('follower').all().values('follower')
         return JsonResponse({
             'success': True,
             'followers': FollowSerializer(followers, many=True).data
@@ -27,10 +25,45 @@ def get_all_followers(request):
         }, status=status.HTTP_404_NOT_FOUND)
 
 
-# SELECT *, (SELECT COUNT(*) FROM user_follow 
-#             WHERE follower_id = 1 AND followee_id =   user_enduser.id) AS is_following 
-# FROM user_enduser 
-# WHERE id IN (SELECT followee_id FROM user_follow 
+@csrf_exempt
+@api_view(['GET'])
+def get_all_followees_general(request, user_id):
+    try:
+        followees = Follow.objects.filter(
+            follower__id=user_id).select_related('followee').all().values('followee')
+        return JsonResponse({
+            'success': True,
+            'followees': FollowSerializer(followees, many=True).data
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@decorator_from_middleware(AuthStrategyMiddleware)
+def get_all_followers(request):
+    try:
+        followers = Follow.objects.filter(
+            followee__id=request.user.id).select_related('follower').all().values('follower')
+        return JsonResponse({
+            'success': True,
+            'followers': FollowSerializer(followers, many=True).data
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+# SELECT *, (SELECT COUNT(*) FROM user_follow
+#             WHERE follower_id = 1 AND followee_id =   user_enduser.id) AS is_following
+# FROM user_enduser
+# WHERE id IN (SELECT followee_id FROM user_follow
 #                 WHERE follower_id = 3);
 
 @csrf_exempt
@@ -38,12 +71,11 @@ def get_all_followers(request):
 @decorator_from_middleware(AuthStrategyMiddleware)
 def get_all_followees(request):
     try:
-        followers = Follow.objects.filter(
-            followee=request.user.id).select_related('followee').all().values('followee')
-        print(followers[0])
+        followees = Follow.objects.filter(
+            follower__id=request.user.id).select_related('followee').all().values('followee')
         return JsonResponse({
             'success': True,
-            'followers': FollowSerializer(followers, many=True).data
+            'followees': FollowSerializer(followees, many=True).data
         })
     except Exception as e:
         return JsonResponse({
