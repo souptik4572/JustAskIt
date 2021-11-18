@@ -1,8 +1,8 @@
+from api.constants.vote_type_constants import UP_VOTE, VOTE_TYPES
 from django.db import models
 
-from api.constants.vote_type_constants import UP_VOTE, VOTE_TYPES
-from ..user.models import EndUser
 from ..answer.models import Answer
+from ..user.models import EndUser
 
 # Create your models here.
 

@@ -1,22 +1,25 @@
-from django.http import JsonResponse
-from django.db import IntegrityError
-from django.utils.decorators import decorator_from_middleware, decorator_from_middleware_with_args
-from rest_framework.decorators import api_view
-from rest_framework import status
-from ..serializers import EndUserSerializer, LocationSerializer, EducationSerializer, EmploymentSerializer
-from ..models import EndUser, Location, Education, Employment, Follow, Token
-from django.views.decorators.csrf import csrf_exempt
+import binascii
 import json
+import os
+from datetime import datetime, timedelta
+
 import bcrypt
 import jwt
-from datetime import datetime, timedelta
-from decouple import config
-from ...middleware.auth_strategy import AuthStrategyMiddleware
-import os
-import binascii
-from datetime import datetime, timedelta
 import pytz
+from decouple import config
+from django.db import IntegrityError
+from django.http import JsonResponse
+from django.utils.decorators import (decorator_from_middleware,
+                                     decorator_from_middleware_with_args)
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.decorators import api_view
+
+from ...middleware.auth_strategy import AuthStrategyMiddleware
 from ...utils.mailer import send_password_reset_email
+from ..models import Education, Employment, EndUser, Follow, Location, Token
+from ..serializers import (EducationSerializer, EmploymentSerializer,
+                           EndUserSerializer, LocationSerializer)
 
 utc = pytz.UTC
 

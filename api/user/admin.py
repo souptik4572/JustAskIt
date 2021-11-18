@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import EndUser, Location, Education, Employment, Follow
+
+from .models import Education, Employment, EndUser, Follow, Location
 
 # Register your models here.
 admin.site.register(EndUser)

@@ -1,9 +1,16 @@
 from django.urls import path
-from .views.user import register_end_user, login_user, get_user_profile, edit_user_profile, request_password_reset, update_password, get_general_user_profile
-from .views.location import add_new_location, edit_existing_location, delete_existing_location
-from .views.education import add_new_education, edit_existing_education, delete_existing_education
-from .views.employment import add_new_employment, edit_existing_employment, delete_existing_employment
-from .views.follow import follow_particular_user, get_all_followees, unfollow_particular_user, get_all_followers
+
+from .views.education import (add_new_education, delete_existing_education,
+                              edit_existing_education)
+from .views.employment import (add_new_employment, delete_existing_employment,
+                               edit_existing_employment)
+from .views.follow import (follow_particular_user, get_all_followees,
+                           get_all_followers, unfollow_particular_user)
+from .views.location import (add_new_location, delete_existing_location,
+                             edit_existing_location)
+from .views.user import (edit_user_profile, get_general_user_profile,
+                         get_user_profile, login_user, register_end_user,
+                         request_password_reset, update_password)
 
 urlpatterns = [
     # All User routes. All routes concern User data and User Model

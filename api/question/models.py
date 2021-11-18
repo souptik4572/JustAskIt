@@ -1,6 +1,7 @@
 from django.db import models
-from ..user.models import EndUser
+
 from ..constants.ask_type_constants import ASK_TYPES, PUBLIC
+from ..user.models import EndUser
 
 # Create your models here.
 

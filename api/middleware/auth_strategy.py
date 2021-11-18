@@ -1,9 +1,9 @@
-from django.http import JsonResponse
-from rest_framework import status
-from ..user.models import EndUser
-from ..user.serializers import EndUserSerializer
 import jwt
 from decouple import config
+from django.http import JsonResponse
+from rest_framework import status
+
+from ..user.models import EndUser
 
 ACCESS_SECRET_TOKEN = config('ACCESS_SECRET_TOKEN')
 

@@ -1,5 +1,9 @@
 from django.urls import path
-from .views.comment import create_new_comment, edit_existing_comment, delete_existing_comment, get_all_comments_to_particular_answer, get_all_comments_to_particular_comment
+
+from .views.comment import (create_new_comment, delete_existing_comment,
+                            edit_existing_comment,
+                            get_all_comments_to_particular_answer,
+                            get_all_comments_to_particular_comment)
 from .views.comment_vote import vote_a_comment
 
 urlpatterns = [

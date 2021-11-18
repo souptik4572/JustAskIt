@@ -1,15 +1,18 @@
-from django.http import JsonResponse
-from django.utils.decorators import decorator_from_middleware, decorator_from_middleware_with_args
-from rest_framework.decorators import api_view
-from rest_framework import status
+import json
+
 from api.constants.ask_type_constants import LIMITED
 from api.user.models import Follow
-from ..serializers import CommentSerializer
-from ..models import Comment
-from ...answer.models import Answer
+from django.http import JsonResponse
+from django.utils.decorators import (decorator_from_middleware,
+                                     decorator_from_middleware_with_args)
 from django.views.decorators.csrf import csrf_exempt
-import json
+from rest_framework import status
+from rest_framework.decorators import api_view
+
+from ...answer.models import Answer
 from ...middleware.auth_strategy import AuthStrategyMiddleware
+from ..models import Comment
+from ..serializers import CommentSerializer
 
 # Create your views here.
 

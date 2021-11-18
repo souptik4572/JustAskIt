@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import EndUser, Follow, Location, Education, Employment
+
+from .models import Education, Employment, EndUser, Follow, Location
 
 
 class EndUserSerializer(serializers.HyperlinkedModelSerializer):

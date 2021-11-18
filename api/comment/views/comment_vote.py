@@ -1,14 +1,17 @@
-from django.http import JsonResponse
-from django.db.models import Q
-from django.utils.decorators import decorator_from_middleware, decorator_from_middleware_with_args
-from rest_framework.decorators import api_view
-from rest_framework import status
-from api.constants.vote_type_constants import UP_VOTE, DOWN_VOTE
-from ..serializers import CommentVoteSerializer
-from ..models import Comment, CommentVote
-from django.views.decorators.csrf import csrf_exempt
 import json
+
+from api.constants.vote_type_constants import DOWN_VOTE, UP_VOTE
+from django.db.models import Q
+from django.http import JsonResponse
+from django.utils.decorators import (decorator_from_middleware,
+                                     decorator_from_middleware_with_args)
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.decorators import api_view
+
 from ...middleware.auth_strategy import AuthStrategyMiddleware
+from ..models import Comment, CommentVote
+from ..serializers import CommentVoteSerializer
 
 # Create your views here.
 

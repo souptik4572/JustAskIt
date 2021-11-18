@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Answer, AnswerVote
+
 from ..question.serializers import QuestionSerializer
+from .models import Answer, AnswerVote
 
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):

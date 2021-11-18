@@ -1,11 +1,12 @@
 from django.http import JsonResponse
 from django.utils.decorators import decorator_from_middleware
-from rest_framework.decorators import api_view
-from rest_framework import status
-from ..models import EndUser, Follow
-from ..serializers import FollowSerializer, EndUserSerializer
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.decorators import api_view
+
 from ...middleware.auth_strategy import AuthStrategyMiddleware
+from ..models import EndUser, Follow
+from ..serializers import EndUserSerializer, FollowSerializer
 
 
 @csrf_exempt

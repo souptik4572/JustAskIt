@@ -1,5 +1,8 @@
 from django.urls import path
-from .views.answer import create_new_answer, edit_existing_answer, delete_existing_answer, get_all_answers, get_answers_to_particular_question
+
+from .views.answer import (create_new_answer, delete_existing_answer,
+                           edit_existing_answer, get_all_answers,
+                           get_answers_to_particular_question)
 from .views.answer_vote import vote_an_answer
 
 urlpatterns = [

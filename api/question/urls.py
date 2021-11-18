@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import create_new_question, edit_existing_question, delete_existing_question, get_all_questions, get_all_questions_of_logged_user
+
+from .views import (create_new_question, delete_existing_question,
+                    edit_existing_question, get_all_questions,
+                    get_all_questions_of_logged_user)
 
 urlpatterns = [
     path('', get_all_questions_of_logged_user,
