@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+import dj_database_url
+import django_heroku
 from decouple import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -24,7 +26,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
+# The hosted database url, here PostgrSQL is being used
+DATABASE_URL = config('DATABASE_URL')
+
+# The value of environment, either 'profuction' or 'development'
+ENVIRONMENT = config('ENVIRONMENT')
+
 # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True if ENVIRONMENT != 'production' else False
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
@@ -83,23 +92,14 @@ WSGI_APPLICATION = 'justaskit.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
+DATABASES = {}
+if ENVIRONMENT != 'production':
+    DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-}
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'justaskit',
-#         'USER': 'souptiksarkar',
-#         'PASSWORD': '',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
+else:
+    DATABASES['default'] = dj_database_url.config(default=DATABASE_URL)
 
 
 # Password validation
@@ -148,3 +148,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': []
 }
+
+
+django_heroku.settings(locals())
