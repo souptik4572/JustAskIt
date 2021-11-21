@@ -30,7 +30,7 @@ To run this project, you will need to add the following environment variables to
 `DATABASE_URL - PostgreSQL url to be used as database for production`
 ## Installation
 
-Install my-project with npm
+Install JustAskIt following the below commands
 
 ```bash
   pip install virtualenv
