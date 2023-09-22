@@ -35,16 +35,16 @@ class AuthStrategyMiddleware:
                 'success': False,
                 'message': 'Auth Token not provided'
             }, status=status.HTTP_400_BAD_REQUEST)
-        except jwt.InvalidTokenError:
-            return JsonResponse({
-                'success': False,
-                'message': 'Token is invalid'
-            }, status=status.HTTP_401_UNAUTHORIZED)
         except jwt.ExpiredSignatureError:
             return JsonResponse({
                 'success': False,
                 'message': 'Token is expired'
             }, status=status.HTTP_404_NOT_FOUND)
+        except jwt.InvalidTokenError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Token is invalid'
+            }, status=status.HTTP_401_UNAUTHORIZED)
         except EndUser.DoesNotExist:
             return JsonResponse({
                 'success': False,
