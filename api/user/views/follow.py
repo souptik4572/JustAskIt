@@ -61,6 +61,7 @@ def get_all_followers(request):
         }, status=status.HTTP_404_NOT_FOUND)
 
 
+# Raw query to fetch follower count of a particular user
 # SELECT *, (SELECT COUNT(*) FROM user_follow
 #             WHERE follower_id = 1 AND followee_id =   user_enduser.id) AS is_following
 # FROM user_enduser
@@ -116,7 +117,7 @@ def follow_particular_user(request, user_id):
     try:
         follower = request.user
         followee = EndUser.objects.get(pk=user_id)
-        follow = Follow.objects.create(follower=follower, followee=followee)
+        Follow.objects.create(follower=follower, followee=followee)
         return JsonResponse({
             'success': True,
             'message': 'Followed given user'

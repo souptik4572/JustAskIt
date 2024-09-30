@@ -153,3 +153,5 @@ REST_FRAMEWORK = {
 
 
 django_heroku.settings(locals())
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'  # or 'django.db.models.BigAutoField'
