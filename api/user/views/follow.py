@@ -61,6 +61,7 @@ def get_all_followers(request):
         }, status=status.HTTP_404_NOT_FOUND)
 
 
+# Raw query to fetch follower count of a particular user
 # SELECT *, (SELECT COUNT(*) FROM user_follow
 #             WHERE follower_id = 1 AND followee_id =   user_enduser.id) AS is_following
 # FROM user_enduser
