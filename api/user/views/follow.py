@@ -117,7 +117,7 @@ def follow_particular_user(request, user_id):
     try:
         follower = request.user
         followee = EndUser.objects.get(pk=user_id)
-        follow = Follow.objects.create(follower=follower, followee=followee)
+        Follow.objects.create(follower=follower, followee=followee)
         return JsonResponse({
             'success': True,
             'message': 'Followed given user'
