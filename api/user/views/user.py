@@ -25,7 +25,7 @@ from ..serializers import (EducationSerializer, EmploymentSerializer,
 utc = pytz.UTC
 
 ACCESS_SECRET_TOKEN = config('ACCESS_SECRET_TOKEN')
-BCRYPT_SALT = int(config('BCRYPT_SALT'))
+BCRYPT_SALT = int(config('BCRYPT_SALT','5'))
 
 
 def hash_item(item, is_password=True):
@@ -208,12 +208,16 @@ def register_end_user(request):
         description = data['description']
         profile_image = data['profile_image']
         hashed_password = hash_item(password)
-        EndUser.objects.create(name=name, email=email, phone=phone, password=hashed_password,
+        endUser=EndUser.objects.create(name=name, email=email, phone=phone, password=hashed_password,
                                description=description, profile_image=profile_image)
-        return handle_success_response('Successfully registered end user', status=status.HTTP_201_CREATED)
+        encoded_token = jwt.encode({
+            'id': endUser.id,
+            'exp': datetime.now() + timedelta(days=1)
+        }, ACCESS_SECRET_TOKEN, algorithm='HS512')
+        print(encoded_token)
+        return handle_success_response('Successfully registered end user', status=status.HTTP_201_CREATED,data={'token': encoded_token})
     except KeyError:
         return handle_error_response('Please provide all data', status=status.HTTP_400_BAD_REQUEST)
     except IntegrityError:
         return handle_error_response('An user with same email is already registered', status=status.HTTP_403_FORBIDDEN)
-    except Exception as e:
-        return handle_error_response(str(e))
+    
